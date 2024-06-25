@@ -54,16 +54,16 @@ router.post('/login', async (req, res) => {
         const result = await db.query(query, [username]);
 
         if (result.rows.length === 0) {
-            return res.status(400).json({ message: 'Invalid username or password!'});
+            return res.status(401).json({ message: 'Invalid username or password!'});
         }
 
         const isMatch = await bcrypt.compare(passwordhash, result.rows[0].passwordhash);
 
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid username or password!'});
+            return res.status(401).json({ message: 'Invalid username or password!'});
         }
 
-        res.send('Logged in successfully!');
+        res.status(200).json({ message: 'Logged in successfully!' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
