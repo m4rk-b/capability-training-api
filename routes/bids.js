@@ -4,10 +4,10 @@ import db from '../db/database.js';
 const router = Router();
 
 router.post('/bid', async (req, res) => {
-    const { userid, itemid, bidamount } = req.body;
+    const { userid, itemid,  bidamount } = req.body;
     try {
         await db.query('BEGIN');
-
+    
         const itemQuery = 'SELECT version, currentbid FROM items WHERE itemid = $1 FOR UPDATE';
         const itemResult = await db.query(itemQuery, [itemid]);
         const item = itemResult.rows[0];

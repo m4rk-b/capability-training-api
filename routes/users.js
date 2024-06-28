@@ -63,7 +63,7 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid username or password!'});
         }
 
-        res.status(200).json({ message: 'Logged in successfully!' });
+        res.status(200).json({ id: result.rows[0].userid, message: 'Logged in successfully!' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -75,7 +75,7 @@ router.post('/password/update/:id', async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(passwordhash, 10);
 
-        const query = 'UPDATE users SET passwordhash = $1 WHERE userid = $2 RETURNING *';
+        const query = 'UPDATE users SET passwordhash = $1, points = points WHERE userid = $2 RETURNING *';
         const result = await db.query(query, [hashedPassword, userID]);
 
         if (result.rows.length === 0) {
