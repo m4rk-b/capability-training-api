@@ -16,12 +16,12 @@ router.post('/bid', async (req, res) => {
         const userResult = await db.query(userQuery, [userid]);
         const user = userResult.rows[0];
 
-        if (bidamount <= item.currentbid) {
+        if (parseInt(bidamount) <= parseInt(item.currentbid)) {
             await db.query('ROLLBACK');
-            return res.send({error: 'Bid must be higher from the current bid!' });
+            return res.send({error: 'Bid amount must be higher than the current price!' });
         }
 
-        if (bidamount > user.points) {
+        if (parseInt(bidamount) > parseInt(user.points)) {
             await db.query('ROLLBACK');
             return res.send({ error: 'Insufficient points to place the bid!' });
         }
