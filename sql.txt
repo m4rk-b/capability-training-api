@@ -1,0 +1,49 @@
+CREATE TABLE Users (
+    UserID SERIAL PRIMARY KEY,
+    Username VARCHAR(50) NOT NULL UNIQUE,
+    PasswordHash VARCHAR(255) NOT NULL,
+    FullName VARCHAR(100),
+    CreatedAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+--Version column is for optimistic locking
+CREATE TABLE Items (
+    ItemID SERIAL PRIMARY KEY,
+    UserID INT,
+    Title VARCHAR(100) NOT NULL,
+    Description TEXT,
+    StartingPrice NUMERIC(10, 2) NOT NULL,
+    ImageURL VARCHAR(255),
+    CreatedAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    Version INT DEFAULT 0,
+    CurrentBid NUMERIC(10, 2),
+    CurrentBidder INT,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE Bids (
+    BidID SERIAL PRIMARY KEY,
+    ItemID INT,
+    UserID INT,
+    BidAmount NUMERIC(10, 2) NOT NULL,
+    BidTime TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (ItemID) REFERENCES Items(ItemID),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE Auctions (
+    AuctionID SERIAL PRIMARY KEY,
+    ItemID INT,
+    StartTime TIMESTAMPTZ NOT NULL,
+    EndTime TIMESTAMPTZ NOT NULL,
+    WinningBidID INT,
+    FOREIGN KEY (ItemID) REFERENCES Items(ItemID),
+    FOREIGN KEY (WinningBidID) REFERENCES Bids(BidID)
+);
+
+CREATE INDEX idx_user_username ON Users(Username);
+CREATE INDEX idx_item_userid ON Items(UserID);
+CREATE INDEX idx_bid_itemid ON Bids(ItemID);
+CREATE INDEX idx_bid_userid ON Bids(UserID);
+CREATE INDEX idx_auction_itemid ON Auctions(ItemID);
+CREATE INDEX idx_auction_winningbidid ON Auctions(WinningBidID);
