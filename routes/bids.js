@@ -18,12 +18,12 @@ router.post('/bid', async (req, res) => {
 
         if (parseInt(bidamount) <= parseInt(item.currentbid)) {
             await db.query('ROLLBACK');
-            return res.send({error: 'Bid amount must be higher than the current price!' });
+            return res.send({message: 'Bid amount must be higher than the current price!' });
         }
 
         if (parseInt(bidamount) > parseInt(user.points)) {
             await db.query('ROLLBACK');
-            return res.send({ error: 'Insufficient points to place the bid!' });
+            return res.send({ message: 'Insufficient points to place the bid!' });
         }
 
         const updateQuery = 'UPDATE items set currentbid = $1, currentbidder = $2, version = version + 1 WHERE itemid = $3 AND version = $4';
@@ -31,7 +31,7 @@ router.post('/bid', async (req, res) => {
 
         if (updateResult.rowCount === 0) {
             await db.query('ROLLBACK');
-            return res.send({ error: 'Bid conflict, try again!' });
+            return res.send({ message: 'Bid conflict, try again!' });
         }
 
         const insertBidQuery = 'INSERT INTO bids (itemid, userid, bidamount) VALUES ($1, $2, $3)';
