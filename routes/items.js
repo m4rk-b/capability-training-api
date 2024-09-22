@@ -5,7 +5,7 @@ const router = Router();
 
 router.get('/', async (req, res) => {
     try {
-        const query = 'SELECT * FROM items';
+        const query = 'SELECT * FROM items ORDER BY itemid ASC';
         const result = await db.query(query);
         res.send(result.rows);
     } catch (err) {
