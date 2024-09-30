@@ -69,18 +69,25 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.post('/password/update/:id', async (req, res) => {
-    const userID = req.params.id;
-    const { passwordhash } = req.body;
+router.post('/update/password', async (req, res) => {
+    const { username, oldpasswordhash, newpasswordhash } = req.body;
     try {
-        const hashedPassword = await bcrypt.hash(passwordhash, 10);
+        const userQuery = 'SELECT userid, passwordhash FROM users WHERE username = $1';
+        const userResult = await db.query(userQuery, [username]);
 
-        const query = 'UPDATE users SET passwordhash = $1, points = points WHERE userid = $2 RETURNING *';
-        const result = await db.query(query, [hashedPassword, userID]);
-
-        if (result.rows.length === 0) {
+        if (userResult.rows.length === 0) {
             return res.status(404).json({ message: 'User does not exist!' });
         }
+
+        const isMatch = await bcrypt.compare(oldpasswordhash, userResult.rows[0].passwordhash);
+        
+        if (!isMatch) {
+            return res.status(404).json({ message: 'Incorrect password.'})
+        }
+        const newhashedPassword = await bcrypt.hash(newpasswordhash, 10);
+
+        const query = 'UPDATE users SET passwordhash = $1, points = points WHERE userid = $2 RETURNING *';
+        const result = await db.query(query, [newhashedPassword, userResult.rows[0].userid]);
 
         res.status(200).json(result.rows[0])
     } catch (err) {
