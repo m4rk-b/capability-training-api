@@ -3,6 +3,17 @@ import db from '../db/database.js';
 
 const router = Router();
 
+router.get('/auction/:id', async (req, res) => {
+    const itemID = req.params.id;
+    try {
+        const itemAuctionQuery = 'SELECT itemid, starttime, endtime FROM auctions WHERE itemid = $1';
+        const itemAuctionResult = await db.query(itemAuctionQuery, [itemID]);
+        res.send(itemAuctionResult.rows[0]);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
 router.get('/winningbid/:id', async (req, res) => {
     const itemID = req.params.id;
     try {
