@@ -55,6 +55,15 @@ router.post('/bid', async (req, res) => {
             return res.send({error: 'Insufficient points to place the bid!' });
         }
 
+        const currentBidderQuery = 'SELECT userid, bidamount FROM bids WHERE itemid = $1 ORDER BY bidtime DESC';
+        const currentBidderResult = await db.query(currentBidderQuery, [itemid]);
+        const bidder = currentBidderResult.rows[0];
+
+        if (currentBidderResult.rowCount > 0) {
+            const returnPointsQuery = 'UPDATE users set points = points + $1 WHERE userid = $2';
+            await db.query(returnPointsQuery, [parseInt(bidder.bidamount), bidder.userid]);
+        }
+
         const updateQuery = 'UPDATE items set currentbid = $1, currentbidder = $2, version = version + 1 WHERE itemid = $3 AND version = $4';
         const updateResult = await db.query(updateQuery, [bidamount, userid, itemid, item.version]);
 
